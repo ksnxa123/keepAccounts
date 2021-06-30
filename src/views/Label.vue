@@ -26,6 +26,7 @@
 </template>
 
 <script lang='ts'>
+    import { Notify } from 'vant';
     import Vue from 'vue';
     import {Component} from 'vue-property-decorator';
 
@@ -99,7 +100,8 @@
         selected(type:any,item1:any,title:any){
             const tagTypes = this.tags.map((item: { type: any; })=> item.type)
             if(tagTypes.indexOf(type)>=0){
-                console.log('添加过了');
+                Notify({ type: 'warning', message: '标签已经添加过了！',
+                    duration:1000,});
                 return
             }
             if(this.rSelect.indexOf(type)!==-1){

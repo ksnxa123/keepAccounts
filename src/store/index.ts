@@ -79,6 +79,17 @@ const store = new Vuex.Store({
     },
     fetchTags(state) {
       state.tagList = JSON.parse(window.localStorage.getItem('tagList') || '[]');
+      if(!state.tagList || state.tagList.length === 0){
+        const arr = [
+          {name:'公交',type:'car',title:"公交"},
+          {name:'餐饮',type:"foot",title:'餐饮'},
+          {name:"购物",type:"shopping",title:"购物"},
+          {name:"娱乐",type:"play2",title:'娱乐'},
+          {name:"生活居住",type:"stay",title:'生活居住'},
+          {name:"医疗",type:"medical",title:"医疗"},
+        ]
+        store.commit('createTag',arr);
+      }
     },
     createTag(state,rSelect:[{name:string,type:string}]){
       state.tagList.push(...JSON.parse(JSON.stringify(rSelect)));

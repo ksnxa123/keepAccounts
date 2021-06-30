@@ -11,7 +11,7 @@
     <div slot="num">
         <div class="notes">
           <FormItem field-name="备注"
-            placeholder="在这里输入备注"
+            placeholder="写点备注吧..."
             :value.sync="record.notes"
           />
         </div>
@@ -29,6 +29,7 @@ import Tags2 from "@/components/Money/Tags2.vue";
 import { Component,Watch } from "vue-property-decorator";
 import Tabs from '@/components/Tabs.vue';
 import recordTypeList from '@/constants/recordTypeList';
+import { Notify } from "vant";
 
 @Component({
   components: { Tags2, FormItem, Tabs, NumberPad },
@@ -60,7 +61,8 @@ export default class Money extends Vue {
 
   saveRecord() {
     if(this.record.tags.length===0){
-      console.log('请选择一个标签');
+        Notify({ type: 'warning', message: '请选择一个标签！',
+            duration:1000,});
     }else{
       this.$store.commit('createRecord',this.record);
       this.record.notes='';

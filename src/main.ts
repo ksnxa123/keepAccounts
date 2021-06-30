@@ -7,6 +7,9 @@ import Nav from './components/Nav.vue'
 import Layout from './components/Layout.vue'
 import Icon from '@/components/Icon.vue';
 
+import {Notify} from 'vant';
+Vue.use(Notify);
+
 Vue.config.productionTip = false
 
 // 全局组件
