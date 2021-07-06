@@ -5,7 +5,7 @@
             <slot></slot>
         </div>
         <slot name='num'></slot>
-        <Nav />
+        <slot name="footer"></slot>
     </div>
 </template>
 

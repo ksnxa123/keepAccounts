@@ -18,6 +18,7 @@
         <Tabs :data-source="recordTypeList" :value.sync="record.type"/>
         <NumberPad :value.sync="record.amount" @submit="saveRecord"/>
     </div>
+    <Nav slot="footer"></Nav>
   </Layout>
 </template>
 

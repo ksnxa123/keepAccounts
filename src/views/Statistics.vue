@@ -1,30 +1,21 @@
 <template>
   <Layout>
     <Tabs :data-source="recordTypeList" :value.sync="type" slot="header"></Tabs>
+    <div slot="header" class="sTime">
+      <ul v-for="(item,index) in intervalList" :key="item.value">
+        <li @click="sTime(item.value,index)" :class="active == index ? 'active':''">{{item.text}}</li>
+      </ul>
+    </div>
     <div class="chart-wrapper" ref="chartWrapper">
       <Chart class="chart" :options="chartOptions" />
     </div>
     <div class="chart-wrapper" ref="chartWrapper">
       <Chart class="chart" :options="pieWrapper" />
     </div>
-    <ol v-if="groupedList.length>0">
-      <li v-for="(group, index) in groupedList" :key="index">
-        <h3 class="title">{{beautify(group.title)}} <span>￥{{group.total}}</span></h3>
-        <ol>
-          <li v-for="item in group.items" :key="item.id" class="record" @click="change_li(item.createdAt)">
-            <span>{{tagString(item.tags)}}</span>
-            <span class="note">{{item.notes}}</span>
-            <span :class="item.type=='-'? 'money1':'money2'">￥{{item.amount}} </span>
-            <span v-show="item.createdAt === currentIndex" @click="deli(item.createdAt)">
-              <Icon name='del'></Icon>
-            </span>
-          </li>
-        </ol>
-      </li>
-    </ol>
-    <div v-else class="noResult">
+    <div v-if="groupedList.length==0" class="noResult">
       目前没有相关信息~
     </div>
+    <Nav slot="footer"></Nav>
   </Layout>
 </template>
 <script lang="ts">
@@ -32,6 +23,7 @@
   import {Component} from 'vue-property-decorator';
   import Tabs from '@/components/Tabs.vue';
   import recordTypeList from '@/constants/recordTypeList';
+  import intervalList from '@/constants/intervalList';
   import dayjs from 'dayjs';
   import clone from '@/lib/clone';
   import Chart from '@/components/Chart.vue';
@@ -48,6 +40,8 @@
       return tags.length === 0 ? '无' : tags[0].name;
     }
     currentIndex = '';
+    active = -1;
+    time ='';
 
     created(){
       this.$store.commit('fetchRecords');
@@ -276,9 +270,12 @@
       const arr: {}[]=[];
       let map ={};
       let arr1 = [];
+      const today = new Date();
+      const time = day(today).format('YYYY-MM');
       const value = this.groupedList.map(item=>item.items)
-      const value1 = value.flat(1).map(item=>item.tags).flat(1)
-      const money = value.flat(1).map(item=>item.amount)
+      const val = value.flat(1).filter(item=>(item.createdAt as any).substring(0,7) == time)
+      const value1 = val.flat(1).map(item=>item.tags).flat(1)
+      const money = val.flat(1).map(item=>item.amount)
       const value2 = value1.map(item=>item.hasOwnProperty('title') ? item['title']: '其它')
       let size = money.length;
       for(let i = 0;i<size;i++){
@@ -303,8 +300,26 @@
       const result2 = JSON.parse(JSON.stringify(result1).replace(/amount/g, 'value'))    //data为数组，title为修改前，name为修改后
       return result2;
     }
+
+    sTime(value:any,index:any){
+      this.active = index
+      if(value=='week'){
+        console.log('1');
+        const today = dayjs().subtract(6,'day').format('YYYY-MM-DD');
+        console.log(today);
+      }else if(value=='month'){
+        const today = dayjs().format('YYYY-MM');
+        console.log(today);
+        console.log('22');
+      }else if(value=='year'){
+        const today = dayjs().format('YYYY');
+        console.log(today);
+        console.log('333');
+      }
+    }
     type = '-';
     recordTypeList = recordTypeList;
+    intervalList = intervalList;
   }
 </script>
 
@@ -355,6 +370,27 @@
     margin-right: auto;
     margin-left: 16px;
     color: #999;
+  }
+  .sTime{
+    display: flex;
+    >ul{
+      border: 8px solid #1eda3d;
+      line-height: 24px;
+      display: flex;
+      flex: 1;
+      >li{
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #1eda3d;
+        border: 1px solid black;
+      }
+      .active{
+        background: black;
+        color: #1eda3d;
+      }
+    }
   }
 </style>
 

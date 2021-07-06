@@ -15,6 +15,7 @@ type Tag = {
   id: string;
   name: string;
   title:string;
+  type:string;
 }
 type TagListModel = {
   data: Tag[]
