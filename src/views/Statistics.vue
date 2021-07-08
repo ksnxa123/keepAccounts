@@ -6,13 +6,15 @@
         <li @click="sTime(item.value,index)" :class="active == index ? 'active':''">{{item.text}}</li>
       </ul>
     </div>
-    <div class="chart-wrapper" ref="chartWrapper">
-      <Chart class="chart" :options="chartOptions" />
+    <div v-if="groupedList.length!==0">
+      <div class="chart-wrapper" ref="chartWrapper">
+        <Chart class="chart" :options="chartOptions" />
+      </div>
+      <div class="chart-wrapper" ref="chartWrapper">
+        <Chart class="chart" :options="pieWrapper" />
+      </div>
     </div>
-    <div class="chart-wrapper" ref="chartWrapper">
-      <Chart class="chart" :options="pieWrapper" />
-    </div>
-    <div v-if="groupedList.length==0" class="noResult">
+    <div v-else class="noResult">
       目前没有相关信息~
     </div>
     <Nav slot="footer"></Nav>
@@ -52,8 +54,8 @@
     }
 
     mounted() {
-      const div = (this.$refs.chartWrapper as HTMLDivElement);
-      div.scrollLeft = div.scrollWidth;
+      // const div = (this.$refs.chartWrapper as HTMLDivElement);
+      // div.scrollLeft = div.scrollWidth;
     }
     updated(){
       this.keyValueList
@@ -130,7 +132,6 @@
     get chartOptions() {
       const keys = this.keyValueList.map(item => item.key);
       const values = this.keyValueList.map(item => item.value);
-      
       return {
         title:{
           text:this.getText() +'趋势',
@@ -154,7 +155,7 @@
           axisLine: {lineStyle: {color: '#666'}},
           axisLabel: {
             formatter: function (value: string, index: number) {
-              return value.length>5 ? value.substr(5) : value;
+              return value.length>5 ? value.substr(8) : value;
             },
             // interval:4,
             rotate:30
@@ -166,7 +167,8 @@
           axisLabel:{
             formatter:function(value:number){
               return '￥'+value
-            }
+            },
+            show:values.some(item=>item!==0)
           }
         },
         series: [{
@@ -366,47 +368,9 @@
   }
   .noResult{
    padding: 16px;
-   text-align: center; 
-  }
-  ::v-deep {
-    .type-tabs-item {
-      background: #C4C4C4;
-      &.selected {
-        background: white;
-        &::after {
-          display: none;
-        }
-      }
-    }
-    .interval-tabs-item {
-      height: 48px;
-    }
-  }
-  %item {
-    padding: 8px 16px;
-    line-height: 24px;
-    display: flex;
-    justify-content: space-between;
-    align-content: center;
-  }
-  .title {
-    @extend %item;
-    background:  #E5E5E5;
-  }
-  .money1{
-    color: salmon;
-  }
-  .money2{
-    color: seagreen;
-  }
-  .record {
-    background: white;
-    @extend %item;
-  }
-  .note {
-    margin-right: auto;
-    margin-left: 16px;
-    color: #999;
+   border: 10px solid rgba(25, 186, 139, 0.17);
+   text-align: center;
+   height: 100%;
   }
   .sTime{
     display: flex;
