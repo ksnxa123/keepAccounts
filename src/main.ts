@@ -7,8 +7,13 @@ import Nav from './components/Nav.vue'
 import Layout from './components/Layout.vue'
 import Icon from '@/components/Icon.vue';
 
-import {Notify} from 'vant';
-Vue.use(Notify);
+import {Notify,DatetimePicker,Popup,Cell} from 'vant';
+Vue.use(Notify).use(DatetimePicker).use(Popup).use(Cell);
+
+import dayjs from 'dayjs'
+import isBetween from 'dayjs/plugin/isBetween'
+dayjs.extend(isBetween)
+dayjs.locale('zh-cn')
 
 Vue.config.productionTip = false
 

@@ -20,7 +20,7 @@
 </template>
 <script lang="ts">
   import Vue from 'vue';
-  import {Component} from 'vue-property-decorator';
+  import {Component,Watch} from 'vue-property-decorator';
   import Tabs from '@/components/Tabs.vue';
   import recordTypeList from '@/constants/recordTypeList';
   import intervalList from '@/constants/intervalList';
@@ -42,15 +42,21 @@
     currentIndex = '';
     active = -1;
     time ='';
+    today = '';
+    val: RecordItem[] = [];
 
     created(){
       this.$store.commit('fetchRecords');
       this.getPieData()
+      this.sTime
     }
 
     mounted() {
       const div = (this.$refs.chartWrapper as HTMLDivElement);
       div.scrollLeft = div.scrollWidth;
+    }
+    updated(){
+      this.keyValueList
     }
 
     beautify(string: string) {
@@ -69,21 +75,47 @@
       }
     }
 
-    get keyValueList() {
-      const today = new Date();
-      var m = today.getMonth() + 1 < 10 ? '0' + (today.getMonth() + 1) : today.getMonth() + 1;
-      var d = today.getDate();
-      const array = [];
-      for (let i = 0; i <= 29; i++) {
-        var dateString = day(today).subtract(i, 'day').format('YYYY-MM-DD');
-        const found = _.find(this.groupedList, {
-          title: dateString
-        });
-        array.push({
-          key: dateString, value: found ? found.total : 0
-        });
+    get keyValueList(){
+      const key = this.val.map(item=>item.amount);
+      const value3 = this.val.filter(item=>dayjs(item.createdAt).format('YYYY')==dayjs().format('YYYY'));
+      const arr = []
+      if(this.active == 0){
+        let i =0
+        while(i<7){
+          const found = _.find(this.groupedList, {
+            title: dayjs().subtract(i,'day').format('YYYY-MM-DD')
+          });
+          const dateString = dayjs().subtract(i++,'day').format('YYYY-MM-DD');
+          arr.push({
+            key: dateString, value: found ? found.total : 0
+          });
+        }
+      }else if(this.active == 1||this.active==-1){
+        this.active = 1;
+        let len = dayjs().daysInMonth()
+        for (let i = 0; i < len; i++) {
+          var dateString = dayjs(dayjs().format('YYYY-MM')+'-01').add(i, 'day').format('YYYY-MM-DD');
+          const found = _.find(this.groupedList, {
+            title: dateString
+          });
+          arr.push({
+            key: dateString, value: found ? found.total : 0
+          });
+        }
+      }else if(this.active == 2){
+        let arr1: number[] = [0,0,0,0,0,0,0,0,0,0,0,0];
+        value3.map(item =>{
+          const m = dayjs(item.createdAt).month();
+          arr1[m] = arr1[m]+Number(item.amount)
+        })
+        for(let i =0;i<12;i++){
+          var dateString = dayjs('01').add(i,'month').format('MM');
+          arr.push({
+            key:dateString,value : arr1[i]
+          })
+        }
       }
-      array.sort((a, b) => {
+      arr.sort((a, b) => {
         if (a.key > b.key) {
           return 1;
         } else if (a.key === b.key) {
@@ -92,12 +124,13 @@
           return -1;
         }
       });
-      return array.slice(30-d);
+      return arr
     }
 
     get chartOptions() {
       const keys = this.keyValueList.map(item => item.key);
       const values = this.keyValueList.map(item => item.value);
+      
       return {
         title:{
           text:this.getText() +'趋势',
@@ -121,9 +154,9 @@
           axisLine: {lineStyle: {color: '#666'}},
           axisLabel: {
             formatter: function (value: string, index: number) {
-              return value.substr(5);
+              return value.length>5 ? value.substr(5) : value;
             },
-            interval:4,
+            // interval:4,
             rotate:30
           }
         },
@@ -273,9 +306,10 @@
       const today = new Date();
       const time = day(today).format('YYYY-MM');
       const value = this.groupedList.map(item=>item.items)
-      const val = value.flat(1).filter(item=>(item.createdAt as any).substring(0,7) == time)
-      const value1 = val.flat(1).map(item=>item.tags).flat(1)
-      const money = val.flat(1).map(item=>item.amount)
+      const val1 = value.flat(1).filter(item=>(item.createdAt as any).substring(0,7) == time)
+      const val2 = this.val.length==0 ? val1 :this.val;
+      const value1 = val2.flat(1).map(item=>item.tags).flat(1)
+      const money = val2.flat(1).map(item=>item.amount)
       const value2 = value1.map(item=>item.hasOwnProperty('title') ? item['title']: '其它')
       let size = money.length;
       for(let i = 0;i<size;i++){
@@ -302,24 +336,27 @@
     }
 
     sTime(value:any,index:any){
+      const value1 = this.groupedList.map(item=>item.items)
       this.active = index
       if(value=='week'){
-        console.log('1');
-        const today = dayjs().subtract(6,'day').format('YYYY-MM-DD');
-        console.log(today);
+        this.today = dayjs().subtract(6,'day').format('YYYY-MM-DD');
+        this.val = value1.flat(1).filter(item=>dayjs((item.createdAt as any).substring(0,7)).isBetween(this.today,dayjs().format('YYYY-MM-DD')))
       }else if(value=='month'){
-        const today = dayjs().format('YYYY-MM');
-        console.log(today);
-        console.log('22');
+        this.today = dayjs().format('YYYY-MM');
+        this.val = value1.flat(1).filter(item=>(item.createdAt as any).substring(0,7) == this.today)
       }else if(value=='year'){
-        const today = dayjs().format('YYYY');
-        console.log(today);
-        console.log('333');
+        this.today = dayjs().format('YYYY');
+        this.val = value1.flat(1).filter(item=>(item.createdAt as any).substring(0,4) == this.today)
       }
+      return this.val
     }
     type = '-';
     recordTypeList = recordTypeList;
     intervalList = intervalList;
+    @Watch('type')
+    private onChanged(val:any,old:any){
+      this.active = -1
+    }
   }
 </script>
 

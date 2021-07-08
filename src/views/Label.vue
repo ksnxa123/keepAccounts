@@ -93,7 +93,6 @@
         ok(){       
             this.rSelect = [];
             this.$router.push({path:'/money'});
-            console.log(this.rSelect2);
             this.$store.commit('createTag',this.rSelect2)
             this.rSelect2=[];
         }
@@ -113,7 +112,6 @@
                     let key = 'title';
                     item1[key] = title;
                     this.rSelect2.push(item1)
-                    console.log(this.rSelect2);
                 }else{
                     console.log('不能加了');
                 }

@@ -1,13 +1,6 @@
 <template>
   <Layout class-prefix="layout">
     <Tags2 @change='onUpdateTags' ref='tags'></Tags2>
-    <!-- <div class="createAt">
-      <FormItem field-name='日期'
-        type="date"
-        placeholder="在这里输入日期"
-        :value.sync = "record.createAt"
-      />
-    </div> -->
     <div slot="num">
         <div class="notes">
           <FormItem field-name="备注"
@@ -16,7 +9,7 @@
           />
         </div>
         <Tabs :data-source="recordTypeList" :value.sync="record.type"/>
-        <NumberPad :value.sync="record.amount" @submit="saveRecord"/>
+        <NumberPad :value.sync="record.amount"  @submit="saveRecord"/>
     </div>
     <Nav slot="footer"></Nav>
   </Layout>
@@ -49,7 +42,7 @@ export default class Money extends Vue {
     notes: "",
     type: "-",
     amount: 0,
-    createdAt: new Date().toISOString()
+    createdAt: ''
   };
 
   created(){
@@ -60,7 +53,9 @@ export default class Money extends Vue {
     this.record.tags.splice(0,1,...value[0]);
   }
 
-  saveRecord() {
+  saveRecord(amount1:any,createdAt1:any) {
+    var str = new Date().toISOString()
+    this.record.createdAt = createdAt1 + str.substring(10)
     if(this.record.tags.length===0){
         Notify({ type: 'warning', message: '请选择一个标签！',
             duration:1000,});
