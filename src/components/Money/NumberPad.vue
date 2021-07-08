@@ -24,7 +24,7 @@
     <van-popup v-model="show" 
         safe-area-inset-bottom 
         :overlay="true"
-        position="bottom" :style="{height:'30%'}">
+        position="bottom" :style="{height:'40%'}">
           <van-datetime-picker
             v-model="currentDate"
             toolbar-position='top'

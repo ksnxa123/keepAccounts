@@ -2,7 +2,7 @@
   <Layout>
     <div slot="header" class="header">
       <div>
-        <div>
+        <!-- <div>
           <select class="year" v-model="sList[0]">
             <option v-for="item in year" :key='item.name' :value="item.value">{{item.name}}</option>
           </select>
@@ -13,7 +13,15 @@
             <option v-for="item in month" :key="item.name" :value="item.value">{{item.name}}</option>
           </select>
           <span>月</span>
-        </div>
+        </div> -->
+          <div @click="showPopup">
+            <span class="year">{{date.substring(0,4)}}</span>
+            <span>年</span>
+          </div>
+          <div @click="showPopup">
+            <span class="month">{{date.substring(5)}}</span>
+            <span>月</span>
+          </div>
       </div>
       <div>
         <span>收入<span class="num">{{this.moneyDetail[1]}}</span></span>
@@ -40,6 +48,21 @@
         <span>暂无数据</span>
     </div>
     <Nav slot="footer"></Nav>
+    <van-popup v-model="show" 
+        safe-area-inset-bottom 
+        :overlay="true"
+        position="bottom" :style="{height:'40%'}">
+          <van-datetime-picker
+            v-model="currentDate"
+            toolbar-position='top'
+            type="year-month"
+            :min-date="minDate"
+            :max-date="maxDate"
+            @cancel='cancelFn'
+            @confirm = saveTime
+            @change="endTime"
+          />
+    </van-popup>
   </Layout>
 </template>
 <script lang="ts">
@@ -84,6 +107,26 @@
       {name:"12",value:"12"},
     ]
 
+    show = false;
+    sdate =''
+    date = dayjs().format('YYYY-MM')
+    showPopup(){
+      this.show = true
+    }
+    minDate = new Date(2020, 0, 1);
+    maxDate = new Date(2025, 10, 1);
+    currentDate = new Date(Number(dayjs().format('YYYY')), Number(dayjs().subtract(1,'month').format('MM')));
+    cancelFn(){
+      this.show = false
+    }
+    saveTime(e: any){
+      this.show = false
+      this.date = this.sdate[0]+'-'+this.sdate[1]
+    }
+    endTime(e: any){
+      this.sdate = e.getValues();
+    }
+
     created(){
       this.$store.commit('fetchRecords');
       this.getOption();
@@ -91,7 +134,7 @@
       this.getday();
     }
     updated(){
-      
+      console.log(this.date);
     }
 
     beautify(string: string) {
@@ -148,7 +191,7 @@
         },0)
       });
       result.map(item=>{
-        if(item.title.substring(0,7)==this.str){
+        if(item.title.substring(0,7)==this.date){
           arr.push(item)
         }
       })
@@ -205,11 +248,6 @@
       return time
     }
 
-    str = this.getday()
-    @Watch('sList')
-    private onChanged(val:any,old:any){
-      this.str = val[0] +'-'+ val[1]
-    }
     type = '-';
     recordTypeList = recordTypeList;
   }
@@ -240,16 +278,16 @@
         >:nth-child(1){
           flex: 1;
           >div{
-            padding-left: 20px;
+            padding: 5px 0 0 20px;
+
             >span{
               font-size: 12px;
             }
             >.year{
-              font-size: 12px;
               padding: 10px 3px;
-              margin-bottom: 5px;
             }
             >.month{
+              padding: 10px 3px;
               font-size: 20px;
             }
           }
